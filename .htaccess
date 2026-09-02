@@ -1,0 +1,35 @@
+# Apache configuration. Nothing here is required for the site to work on a
+# host that already routes everything to index.php — but on shared hosting
+# (cPanel, Plesk, most LAMP boxes) this file is what makes the clean URLs work.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Real files and folders are served as they are (images, CSS, admin).
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else goes to the front controller.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# The database and the site's own code are never web-served.
+RedirectMatch 404 ^/data/
+RedirectMatch 404 ^/core/
+RedirectMatch 404 ^/content/(pages|memoranda)/.*\.md$
+
+<FilesMatch "\.(md|db|sqlite|log)$">
+    Require all denied
+</FilesMatch>
+
+# Modest caching for images and stylesheets.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png  "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType text/css   "access plus 1 week"
+</IfModule>
